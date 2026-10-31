@@ -1,6 +1,6 @@
 import { db } from '../db/database';
 
-export async function exportBackup(): Promise<void> {
+export async function createBackup() {
   const [products, exchangeRates, settings, sales] = await Promise.all([
     db.products.toArray(),
     db.exchangeRates.toArray(),
@@ -8,13 +8,19 @@ export async function exportBackup(): Promise<void> {
     db.sales.toArray(),
   ]);
 
-  const payload = {
+  return {
     app: 'price-manager',
     backupVersion: 1,
     exportedAt: new Date().toISOString(),
-    products, exchangeRates, settings, sales,
+    products,
+    exchangeRates,
+    settings,
+    sales,
   };
+}
 
+export async function exportBackup(): Promise<void> {
+  const payload = await createBackup();
   const blob = new Blob([JSON.stringify(payload)], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -39,8 +45,10 @@ export async function importBackup(file: File): Promise<void> {
 
   await db.transaction('rw', db.products, db.exchangeRates, db.settings, db.sales, async () => {
     await Promise.all([
-      db.products.clear(), db.exchangeRates.clear(),
-      db.settings.clear(), db.sales.clear(),
+      db.products.clear(),
+      db.exchangeRates.clear(),
+      db.settings.clear(),
+      db.sales.clear(),
     ]);
     await db.products.bulkAdd(data.products);
     await db.exchangeRates.bulkAdd(data.exchangeRates);
