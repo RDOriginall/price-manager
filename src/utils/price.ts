@@ -53,3 +53,10 @@ export function formatTomanPrice(product: Product, rate: ExchangeRate | undefine
 
   return `${numberFormatter.format(finalPrice)} تومان`;
 }
+
+export function formatRialPrice(product: Product, rate: ExchangeRate | undefined): string {
+  if (!rate) return 'نرخ ثبت نشده';
+
+  const toman = calculateTomanPrice(product, rate);
+  return `${numberFormatter.format(toman * 10n)} ریال`;
+}
