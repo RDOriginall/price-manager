@@ -1,10 +1,8 @@
 import { Fragment, useMemo, useState } from 'react';
 import type { ExchangeRate, Product } from '../types/models';
 import { numberFormatter } from '../utils/format';
+import { compareProductsByCode } from '../utils/productSort';
 import { formatBaseTomanPrice, formatForeignPrice, formatTomanPrice } from '../utils/price';
-import type { CurrencyCode } from '../data/currenties';
-
-const displayCurrency = (code: CurrencyCode) => (code === 'Toman' ? 'تومان' : code);
 
 interface ProductsTabProps {
   active: boolean;
@@ -42,7 +40,9 @@ export function ProductsTab({
   );
 
   const query = searchQuery.trim().toLocaleLowerCase();
-  const filteredProducts = products.filter((product) => {
+  const sortedProducts = useMemo(() => [...products].sort(compareProductsByCode), [products]);
+
+  const filteredProducts = sortedProducts.filter((product) => {
     if (!query) return true;
 
     const name = product.name.toLocaleLowerCase();
@@ -145,12 +145,12 @@ export function ProductsTab({
                               <strong>کد محصول:</strong> {product.code || '---'}
                             </p>
                             <p>
-                              <strong>ارز اصلی:</strong> {displayCurrency(product.currencyCode)}
+                              <strong>ارز اصلی:</strong> {product.currencyCode}
                             </p>
                             <p>
                               <strong>قیمت پایه:</strong>{' '}
                               {formatForeignPrice(product.foreignPriceMinor, product.currencyCode)}{' '}
-                              {displayCurrency(product.currencyCode)}
+                              {product.currencyCode}
                             </p>
                             <p>
                               <strong>قیمت اولیه:</strong> {formatBaseTomanPrice(product, rate)}
