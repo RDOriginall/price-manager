@@ -1,7 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import type { ExchangeRate, Product } from '../types/models';
 import { numberFormatter } from './format';
-import { calculateTomanPrice, formatRialPrice, formatTomanPrice, parsePriceToMinor } from './price';
+import {
+  calculateTomanPrice,
+  formatBaseTomanPrice,
+  formatTomanPrice,
+  parsePriceToMinor,
+} from './price';
 
 const product = (overrides: Partial<Product> = {}): Product => ({
   name: 'Test',
@@ -64,12 +69,20 @@ describe('formatTomanPrice', () => {
   });
 });
 
-describe('formatRialPrice', () => {
+describe('formatBaseTomanPrice', () => {
   it('reports a missing rate', () => {
-    expect(formatRialPrice(product(), undefined)).toBe('نرخ ثبت نشده');
+    expect(formatBaseTomanPrice(product(), undefined)).toBe('نرخ ثبت نشده');
   });
 
-  it('is ten times the Toman price', () => {
-    expect(formatRialPrice(product(), rate(60000))).toBe(`${numberFormatter.format(7500000)} ریال`);
+  it('ignores the price adjustment', () => {
+    const adjusted = product({ priceMultiplierBps: 11000 });
+    expect(formatBaseTomanPrice(adjusted, rate(60000))).toBe(
+      `${numberFormatter.format(750000)} تومان`,
+    );
+  });
+
+  it('shows Toman products without needing a rate', () => {
+    const toman = product({ currencyCode: 'Toman', foreignPriceMinor: 50000 });
+    expect(formatBaseTomanPrice(toman, undefined)).toBe(`${numberFormatter.format(50000)} تومان`);
   });
 });

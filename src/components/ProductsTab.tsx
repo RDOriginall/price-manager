@@ -1,7 +1,7 @@
 import { Fragment, useMemo, useState } from 'react';
 import type { ExchangeRate, Product } from '../types/models';
 import { numberFormatter } from '../utils/format';
-import { formatForeignPrice, formatRialPrice, formatTomanPrice } from '../utils/price';
+import { formatBaseTomanPrice, formatForeignPrice, formatTomanPrice } from '../utils/price';
 
 interface ProductsTabProps {
   active: boolean;
@@ -150,10 +150,10 @@ export function ProductsTab({
                               {product.currencyCode}
                             </p>
                             <p>
-                              <strong>قیمت نهایی:</strong> {formatTomanPrice(product, rate)}
+                              <strong>قیمت اولیه:</strong> {formatBaseTomanPrice(product, rate)}
                             </p>
                             <p>
-                              <strong>قیمت به ریال:</strong> {formatRialPrice(product, rate)}
+                              <strong>قیمت نهایی:</strong> {formatTomanPrice(product, rate)}
                             </p>
                             <p>
                               <strong>درصد تغییر قیمت:</strong>{' '}

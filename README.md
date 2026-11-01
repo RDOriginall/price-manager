@@ -51,17 +51,17 @@ To test offline behavior, run `npm run build && npm run preview`, open the page,
 
 ```
 src/
-  db/        Dexie database and repositories (products, sales, exchange rates)
-  data/      supported currencies
-  types/     TypeScript models
-  utils/     Excel export and JSON backup/restore
-  App.tsx    UI
+  components/  tab views (products, product form, sales, exchange rates) and layout
+  hooks/       data loading and actions (products, sales, rates, product form)
+  db/          Dexie database and repositories
+  data/        currencies and UI constants
+  types/       TypeScript models
+  utils/       pricing, formatting, sales stats, Excel export, backup/restore
+  App.tsx      layout and active tab
 ```
 
 ## Roadmap
 
-- Split `App.tsx` into feature components and hooks
-- Unit tests for price conversion, sales, and backup/restore
 - Demo data loader
 
 ## License

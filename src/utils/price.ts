@@ -38,13 +38,25 @@ export function calculateTomanPrice(product: Product, rate: ExchangeRate): bigin
   return (numerator + 50n) / 100n;
 }
 
+/** Price in whole Toman before the per-product price adjustment, or null when no rate is set. */
+function getBaseTomanPrice(product: Product, rate: ExchangeRate | undefined): number | null {
+  if (product.currencyCode === 'Toman') return product.foreignPriceMinor;
+
+  return rate ? Number(calculateTomanPrice(product, rate)) : null;
+}
+
+/** Initial price in Toman, before the percentage adjustment is applied. */
+export function formatBaseTomanPrice(product: Product, rate: ExchangeRate | undefined): string {
+  const basePrice = getBaseTomanPrice(product, rate);
+
+  if (basePrice === null) return 'نرخ ثبت نشده';
+
+  return `${numberFormatter.format(basePrice)} تومان`;
+}
+
+/** Final price in Toman, including the percentage adjustment. */
 export function formatTomanPrice(product: Product, rate: ExchangeRate | undefined): string {
-  const basePrice =
-    product.currencyCode === 'Toman'
-      ? product.foreignPriceMinor
-      : rate
-        ? Number(calculateTomanPrice(product, rate))
-        : null;
+  const basePrice = getBaseTomanPrice(product, rate);
 
   if (basePrice === null) return 'نرخ ثبت نشده';
 
@@ -52,11 +64,4 @@ export function formatTomanPrice(product: Product, rate: ExchangeRate | undefine
   const finalPrice = Math.round((basePrice * multiplier) / 10000);
 
   return `${numberFormatter.format(finalPrice)} تومان`;
-}
-
-export function formatRialPrice(product: Product, rate: ExchangeRate | undefined): string {
-  if (!rate) return 'نرخ ثبت نشده';
-
-  const toman = calculateTomanPrice(product, rate);
-  return `${numberFormatter.format(toman * 10n)} ریال`;
 }
