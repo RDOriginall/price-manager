@@ -1,7 +1,8 @@
 import { db } from './database';
 import type { Product } from '../types/models';
 
-export type newProduct = Pick<Product, 'code' | 'name' | 'currencyCode' | 'foreignPriceMinor'>;
+export type newProduct = Pick<Product, 'code' | 'name' | 'currencyCode' | 'foreignPriceMinor'> &
+    Partial<Pick<Product, 'priceMultiplierBps'>>;
 
 export type ProductChanges = Partial<newProduct>;
 
@@ -25,6 +26,13 @@ function validateProduct(Product: Pick<Product, 'name' | 'foreignPriceMinor'>,
             }
         }
         
+
+/** The multiplier is in basis points and may be fractional (set from a typed final price). */
+function validateMultiplier(multiplier: number | undefined): void {
+    if (multiplier !== undefined && (!Number.isFinite(multiplier) || multiplier <= 0)) {
+        throw new Error('ضریب قیمت باید عددی بزرگ‌تر از صفر باشد.');
+    }
+}
 
 async function ensureCodeIsUnique(
     code: string | undefined,
@@ -50,6 +58,7 @@ export async function addProduct(
     };
 
     validateProduct(product);
+    validateMultiplier(product.priceMultiplierBps);
     await ensureCodeIsUnique(product.code);
 
     const now = new Date().toISOString();
@@ -57,7 +66,7 @@ export async function addProduct(
     return db.products.add({
         ...product,
         stockQuantity: 0,
-        priceMultiplierBps: 10000,
+        priceMultiplierBps: input.priceMultiplierBps ?? 10000,
         createdAt: now,
         updatedAt: now,
     });
@@ -97,10 +106,12 @@ export async function updateProduct(
         ...changes,
         name: (changes.name ?? existing.name).trim(),
         code: normalizeCode(changes.code ?? existing.code),
+        priceMultiplierBps: changes.priceMultiplierBps ?? existing.priceMultiplierBps,
         updatedAt: new Date().toISOString(),
     };
 
     validateProduct(updated);
+    validateMultiplier(changes.priceMultiplierBps);
     await ensureCodeIsUnique(updated.code, id);
 
     await db.products.put(updated);
@@ -137,8 +148,8 @@ export async function setProductPriceMultiplier(
   productId: number,
   percent: number,
 ): Promise<void> {
-  if (!Number.isFinite(percent) || percent <= -100) {
-    throw new Error('درصد تغییر قیمت نمی‌تواند ۱۰۰- یا کمتر باشد.');
+  if (!Number.isFinite(percent) || percent < -100) {
+    throw new Error('درصد تغییر قیمت نمی‌تواند کمتر از ۱۰۰- باشد.');
   }
 
   const product = await db.products.get(productId);

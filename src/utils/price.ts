@@ -33,13 +33,19 @@ export function formatForeignPrice(minor: number, currencyCode: CurrencyCode): s
 }
 
 /** Converts a foreign price (minor units) to whole Toman, rounded to the nearest Toman. */
-export function calculateTomanPrice(product: Product, rate: ExchangeRate): bigint {
+export function calculateTomanPrice(
+  product: Pick<Product, 'foreignPriceMinor'>,
+  rate: ExchangeRate,
+): bigint {
   const numerator = BigInt(product.foreignPriceMinor) * BigInt(rate.rateToToman);
   return (numerator + 50n) / 100n;
 }
 
 /** Price in whole Toman before the per-product price adjustment, or null when no rate is set. */
-function getBaseTomanPrice(product: Product, rate: ExchangeRate | undefined): number | null {
+export function getBaseTomanPrice(
+  product: Pick<Product, 'currencyCode' | 'foreignPriceMinor'>,
+  rate: ExchangeRate | undefined,
+): number | null {
   if (product.currencyCode === 'Toman') return product.foreignPriceMinor;
 
   return rate ? Number(calculateTomanPrice(product, rate)) : null;
@@ -64,4 +70,33 @@ export function formatTomanPrice(product: Product, rate: ExchangeRate | undefine
   const finalPrice = Math.round((basePrice * multiplier) / 10000);
 
   return `${numberFormatter.format(finalPrice)} تومان`;
+}
+
+/** Converts Persian/Arabic digits to Latin and removes thousands separators and spaces. */
+export function normalizeNumberInput(value: string): string {
+  return value
+    .replace(/[۰-۹]/g, (digit) => String(digit.charCodeAt(0) - 0x06f0))
+    .replace(/[٠-٩]/g, (digit) => String(digit.charCodeAt(0) - 0x0660))
+    .replace(/[,٬\s]/g, '');
+}
+
+/**
+ * Multiplier (in basis points, possibly fractional) that turns a base Toman price into the
+ * wanted final price. The product then keeps this margin when the exchange rate changes.
+ */
+export function calculateMultiplierForFinalPrice(baseToman: number, finalToman: number): number {
+  if (!Number.isSafeInteger(baseToman) || baseToman <= 0) {
+    throw new Error('قیمت اولیه باید بیشتر از صفر باشد تا بتوان قیمت نهایی را تعیین کرد.');
+  }
+
+  if (!Number.isSafeInteger(finalToman) || finalToman <= 0) {
+    throw new Error('قیمت نهایی باید عدد صحیح و بزرگ‌تر از صفر باشد.');
+  }
+
+  return (finalToman / baseToman) * 10000;
+}
+
+/** Percentage change for display, rounded to two decimals (11000 bps becomes 10). */
+export function getPercentChange(multiplierBps: number): number {
+  return Number((multiplierBps / 100 - 100).toFixed(2));
 }

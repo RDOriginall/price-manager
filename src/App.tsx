@@ -23,6 +23,7 @@ function App() {
   const { form, setForm, editingId, saving, resetForm, handleSubmit, handleEdit } = useProductForm({
     refreshProducts,
     setError,
+    rates,
   });
 
   const actions = useProductActions({

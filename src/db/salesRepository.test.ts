@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import { saveManualExchangeRate } from './exchangeRateRepository';
-import { addProduct, getProductById, setProductPriceMultiplier, setProductStock } from './productRepository';
+import {
+  addProduct,
+  getProductById,
+  setProductPriceMultiplier,
+  setProductStock,
+} from './productRepository';
 import { getSalesHistory, recordSale } from './salesRepository';
 
 describe('recordSale', () => {
@@ -68,5 +73,21 @@ describe('recordSale', () => {
     await setProductStock(id, 5);
     await expect(recordSale({ productId: id, quantity: 0 })).rejects.toThrow();
     await expect(recordSale({ productId: id, quantity: 1.5 })).rejects.toThrow();
+  });
+
+  it('sells at the exact final price typed by the user', async () => {
+    await saveManualExchangeRate('USD', 60000);
+    const id = await addProduct({
+      name: 'Serum',
+      currencyCode: 'USD',
+      foreignPriceMinor: 1250,
+      priceMultiplierBps: (899000 / 750000) * 10000,
+    });
+    await setProductStock(id, 2);
+    await recordSale({ productId: id, quantity: 2 });
+
+    const [sale] = await getSalesHistory();
+    expect(sale.unitPriceToman).toBe(899000);
+    expect(sale.totalPriceToman).toBe(1798000);
   });
 });

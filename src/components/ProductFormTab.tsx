@@ -84,6 +84,17 @@ export function ProductFormTab({
           />
         </label>
 
+        <label>
+          قیمت نهایی به تومان (اختیاری)
+          <input
+            type='text'
+            inputMode='numeric'
+            value={form.finalPriceToman}
+            onChange={(event) => setForm({ ...form, finalPriceToman: event.target.value })}
+            placeholder='خالی = حفظ درصد فعلی'
+          />
+        </label>
+
         {error && (
           <p className='error-message' role='alert'>
             {' '}

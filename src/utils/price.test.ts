@@ -2,9 +2,12 @@ import { describe, expect, it } from 'vitest';
 import type { ExchangeRate, Product } from '../types/models';
 import { numberFormatter } from './format';
 import {
+  calculateMultiplierForFinalPrice,
   calculateTomanPrice,
   formatBaseTomanPrice,
   formatTomanPrice,
+  getPercentChange,
+  normalizeNumberInput,
   parsePriceToMinor,
 } from './price';
 
@@ -84,5 +87,36 @@ describe('formatBaseTomanPrice', () => {
   it('shows Toman products without needing a rate', () => {
     const toman = product({ currencyCode: 'Toman', foreignPriceMinor: 50000 });
     expect(formatBaseTomanPrice(toman, undefined)).toBe(`${numberFormatter.format(50000)} تومان`);
+  });
+});
+
+describe('calculateMultiplierForFinalPrice', () => {
+  it('reproduces the typed final price exactly', () => {
+    for (const finalToman of [899000, 750001, 123457, 1_000_000]) {
+      const multiplier = calculateMultiplierForFinalPrice(750000, finalToman);
+      const text = formatTomanPrice(product({ priceMultiplierBps: multiplier }), rate(60000));
+      expect(text).toBe(`${numberFormatter.format(finalToman)} تومان`);
+    }
+  });
+
+  it('rejects a zero base price or a non-positive final price', () => {
+    expect(() => calculateMultiplierForFinalPrice(0, 1000)).toThrow();
+    expect(() => calculateMultiplierForFinalPrice(1000, 0)).toThrow();
+    expect(() => calculateMultiplierForFinalPrice(1000, 10.5)).toThrow();
+  });
+});
+
+describe('getPercentChange', () => {
+  it('rounds to two decimals', () => {
+    expect(getPercentChange(10000)).toBe(0);
+    expect(getPercentChange(11000)).toBe(10);
+    expect(getPercentChange(11986.666666666666)).toBe(19.87);
+  });
+});
+
+describe('normalizeNumberInput', () => {
+  it('converts Persian digits and removes separators', () => {
+    expect(normalizeNumberInput('۸۹۹٬۰۰۰')).toBe('899000');
+    expect(normalizeNumberInput(' 1,234 567 ')).toBe('1234567');
   });
 });

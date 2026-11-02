@@ -50,4 +50,20 @@ describe('productRepository', () => {
     expect((await getProductById(a))?.priceMultiplierBps).toBe(5500);
     await expect(adjustAllProductPrices(-101)).rejects.toThrow();
   });
+
+  it('stores a fractional multiplier from a typed final price', async () => {
+    const id = await addProduct({ ...base, priceMultiplierBps: 11986.67 });
+    expect((await getProductById(id))?.priceMultiplierBps).toBe(11986.67);
+    await expect(addProduct({ ...base, name: 'Bad', priceMultiplierBps: 0 })).rejects.toThrow();
+  });
+
+  it('keeps the multiplier on update unless a new one is given', async () => {
+    const id = await addProduct({ ...base, priceMultiplierBps: 12000 });
+
+    await updateProduct(id, { name: 'Renamed' });
+    expect((await getProductById(id))?.priceMultiplierBps).toBe(12000);
+
+    await updateProduct(id, { priceMultiplierBps: 9000 });
+    expect((await getProductById(id))?.priceMultiplierBps).toBe(9000);
+  });
 });

@@ -1,6 +1,7 @@
 
 import ExcelJS from 'exceljs';
 import { getSalesHistory } from '../db/salesRepository';
+import { getPercentChange } from './price';
 
 export async function exportSalesToExcel(): Promise<void> {
   const sales = await getSalesHistory();
@@ -40,7 +41,7 @@ export async function exportSalesToExcel(): Promise<void> {
       sale.currencyCode === 'Toman'
         ? sale.productPriceMinorAtSale
         : sale.productPriceMinorAtSale / 100,
-      multiplier: (sale.priceMultiplierBpsAtSale / 100) - 100,
+      multiplier: getPercentChange(sale.priceMultiplierBpsAtSale),
       unitPriceToman: sale.unitPriceToman,
       totalPriceToman: sale.totalPriceToman,
     });

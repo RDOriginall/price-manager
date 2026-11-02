@@ -2,7 +2,15 @@ import { Fragment, useMemo, useState } from 'react';
 import type { ExchangeRate, Product } from '../types/models';
 import { numberFormatter } from '../utils/format';
 import { compareProductsByCode } from '../utils/productSort';
-import { formatBaseTomanPrice, formatForeignPrice, formatTomanPrice } from '../utils/price';
+import {
+  formatBaseTomanPrice,
+  formatForeignPrice,
+  formatTomanPrice,
+  getPercentChange,
+} from '../utils/price';
+import type { CurrencyCode } from '../data/currenties';
+
+const displayCurrency = (code: CurrencyCode) => (code === 'Toman' ? 'تومان' : code);
 
 interface ProductsTabProps {
   active: boolean;
@@ -145,12 +153,12 @@ export function ProductsTab({
                               <strong>کد محصول:</strong> {product.code || '---'}
                             </p>
                             <p>
-                              <strong>ارز اصلی:</strong> {product.currencyCode}
+                              <strong>ارز اصلی:</strong> {displayCurrency(product.currencyCode)}
                             </p>
                             <p>
                               <strong>قیمت پایه:</strong>{' '}
                               {formatForeignPrice(product.foreignPriceMinor, product.currencyCode)}{' '}
-                              {product.currencyCode}
+                              {displayCurrency(product.currencyCode)}
                             </p>
                             <p>
                               <strong>قیمت اولیه:</strong> {formatBaseTomanPrice(product, rate)}
@@ -160,7 +168,7 @@ export function ProductsTab({
                             </p>
                             <p>
                               <strong>درصد تغییر قیمت:</strong>{' '}
-                              {(product.priceMultiplierBps ?? 10000) / 100 - 100}٪
+                              {getPercentChange(product.priceMultiplierBps ?? 10000)}٪
                             </p>
                             <p>
                               <strong>موجودی:</strong>{' '}

@@ -7,6 +7,7 @@ import {
 import { getSalesHistory, recordSale } from '../db/salesRepository';
 import type { Product } from '../types/models';
 import { getErrorMessage } from '../utils/errors';
+import { getPercentChange } from '../utils/price';
 
 interface Options {
   products: Product[];
@@ -117,7 +118,7 @@ export function useProductActions({
       return;
     }
 
-    const currentPercent = (product.priceMultiplierBps ?? 10000) / 100 - 100;
+    const currentPercent = getPercentChange(product.priceMultiplierBps ?? 10000);
 
     const input = window.prompt(
       `درصد افزایش یا کاهش قیمت نهایی برای «${product.name}» را وارد کنید.\nمثلاً 15 برای افزایش 15 درصد یا -10 برای کاهش 10 درصد:`,
