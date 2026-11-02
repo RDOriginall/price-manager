@@ -1,4 +1,5 @@
 import { Fragment, useMemo, useState } from 'react';
+import { formatCurrencyCode } from '../data/currencyLabels';
 import type { ExchangeRate, Product } from '../types/models';
 import { numberFormatter } from '../utils/format';
 import { compareProductsByCode } from '../utils/productSort';
@@ -8,9 +9,6 @@ import {
   formatTomanPrice,
   getPercentChange,
 } from '../utils/price';
-import type { CurrencyCode } from '../data/currenties';
-
-const displayCurrency = (code: CurrencyCode) => (code === 'Toman' ? 'تومان' : code);
 
 interface ProductsTabProps {
   active: boolean;
@@ -153,12 +151,12 @@ export function ProductsTab({
                               <strong>کد محصول:</strong> {product.code || '---'}
                             </p>
                             <p>
-                              <strong>ارز اصلی:</strong> {displayCurrency(product.currencyCode)}
+                              <strong>ارز اصلی:</strong> {formatCurrencyCode(product.currencyCode)}
                             </p>
                             <p>
                               <strong>قیمت پایه:</strong>{' '}
                               {formatForeignPrice(product.foreignPriceMinor, product.currencyCode)}{' '}
-                              {displayCurrency(product.currencyCode)}
+                              {formatCurrencyCode(product.currencyCode)}
                             </p>
                             <p>
                               <strong>قیمت اولیه:</strong> {formatBaseTomanPrice(product, rate)}

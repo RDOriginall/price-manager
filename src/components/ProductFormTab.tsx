@@ -1,7 +1,7 @@
 import type { FormEvent } from 'react';
 import { CURRENCIES } from '../data/currenties';
 import type { CurrencyCode } from '../data/currenties';
-import { CURRENCY_LABELS } from '../data/currencyLabels';
+import { formatCurrencyOption } from '../data/currencyLabels';
 import type { ProductFormValues } from '../hooks/useProductForm';
 
 interface ProductFormTabProps {
@@ -66,7 +66,7 @@ export function ProductFormTab({
           >
             {CURRENCIES.map((currency) => (
               <option key={currency.code} value={currency.code}>
-                {CURRENCY_LABELS[currency.code]} ({currency.code})
+                {formatCurrencyOption(currency.code)}
               </option>
             ))}
           </select>

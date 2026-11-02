@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import { CURRENCIES } from '../data/currenties';
 import type { CurrencyCode } from '../data/currenties';
-import { CURRENCY_LABELS } from '../data/currencyLabels';
+import { formatCurrencyOption } from '../data/currencyLabels';
 import type { ExchangeRate } from '../types/models';
 import { dateFormatter, numberFormatter } from '../utils/format';
 
@@ -45,7 +45,7 @@ export function RatesTab({ active, rates, rateError, onSaveRate }: RatesTabProps
           >
             {CURRENCIES.filter((currency) => currency.code !== 'Toman').map((currency) => (
               <option key={currency.code} value={currency.code}>
-                {CURRENCY_LABELS[currency.code]} ({currency.code})
+                {formatCurrencyOption(currency.code)}
               </option>
             ))}
           </select>
@@ -98,9 +98,7 @@ export function RatesTab({ active, rates, rateError, onSaveRate }: RatesTabProps
             ) : (
               rates.map((rate) => (
                 <tr key={rate.currencyCode}>
-                  <td>
-                    {CURRENCY_LABELS[rate.currencyCode]} ({rate.currencyCode})
-                  </td>
+                  <td>{formatCurrencyOption(rate.currencyCode)}</td>
                   <td>{numberFormatter.format(rate.rateToToman)} تومان</td>
                   <td>{dateFormatter.format(new Date(rate.updatedAt))}</td>
                   <td>{rate.source === 'manual' ? 'دستی' : 'آنلاین'}</td>

@@ -1,6 +1,7 @@
 
 import ExcelJS from 'exceljs';
 import { getSalesHistory } from '../db/salesRepository';
+import { formatCurrencyCode } from '../data/currencyLabels';
 import { getPercentChange } from './price';
 
 export async function exportSalesToExcel(): Promise<void> {
@@ -36,7 +37,7 @@ export async function exportSalesToExcel(): Promise<void> {
       productName: sale.productName,
       productCode: sale.productCode ?? '',
       quantity: sale.quantity,
-      currencyCode: sale.currencyCode,
+      currencyCode: formatCurrencyCode(sale.currencyCode),
       basePrice:
       sale.currencyCode === 'Toman'
         ? sale.productPriceMinorAtSale
