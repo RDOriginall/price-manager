@@ -18,7 +18,17 @@ export function getSaleUnitCostToman(sale: SaleRecord): number {
   );
 }
 
-/** Profit of one sale record in Toman: amount charged minus the cost of the units sold. */
+/** Discount given on a sale line in Toman (0 for sales recorded without a discount). */
+export function getSaleDiscountToman(sale: SaleRecord): number {
+  return sale.discountToman ?? 0;
+}
+
+/** Amount the customer actually paid for a sale line, after the discount. */
+export function getSalePaidTotalToman(sale: SaleRecord): number {
+  return sale.totalPriceToman - getSaleDiscountToman(sale);
+}
+
+/** Profit of one sale record in Toman: amount paid minus the cost of the units sold. */
 export function getSaleProfitToman(sale: SaleRecord): number {
-  return sale.totalPriceToman - getSaleUnitCostToman(sale) * sale.quantity;
+  return getSalePaidTotalToman(sale) - getSaleUnitCostToman(sale) * sale.quantity;
 }

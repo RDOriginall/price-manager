@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import type { SaleRecord } from '../types/models';
-import { getSaleProfitToman, getSaleUnitCostToman } from './profit';
+import {
+  getSaleDiscountToman,
+  getSalePaidTotalToman,
+  getSaleProfitToman,
+  getSaleUnitCostToman,
+} from './profit';
 
 const sale = (overrides: Partial<SaleRecord> = {}): SaleRecord => ({
   productId: 1,
@@ -45,5 +50,20 @@ describe('sale profit', () => {
         sale({ priceMultiplierBpsAtSale: 9000, unitPriceToman: 675000, totalPriceToman: 1350000 }),
       ),
     ).toBe(-150000);
+  });
+
+  describe('sale with a discount', () => {
+    const discounted = sale({ discountToman: 100000 });
+
+    it('reports the amount actually paid', () => {
+      expect(getSaleDiscountToman(discounted)).toBe(100000);
+      expect(getSalePaidTotalToman(discounted)).toBe(1550000);
+      expect(getSaleDiscountToman(sale())).toBe(0);
+      expect(getSalePaidTotalToman(sale())).toBe(1650000);
+    });
+
+    it('computes profit from the amount paid', () => {
+      expect(getSaleProfitToman(discounted)).toBe(50000);
+    });
   });
 });

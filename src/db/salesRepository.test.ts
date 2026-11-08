@@ -90,4 +90,39 @@ describe('recordSale', () => {
     expect(sale.unitPriceToman).toBe(899000);
     expect(sale.totalPriceToman).toBe(1798000);
   });
+
+  it('records a discount and keeps the price before the discount', async () => {
+    await saveManualExchangeRate('USD', 60000);
+    const id = await addProduct({ name: 'Cream', currencyCode: 'USD', foreignPriceMinor: 1000 });
+    await setProductStock(id, 5);
+
+    await recordSale({ productId: id, quantity: 2, discountToman: 100000 });
+
+    const [sale] = await getSalesHistory();
+    expect(sale.totalPriceToman).toBe(1200000);
+    expect(sale.discountToman).toBe(100000);
+    expect((await getProductById(id))?.stockQuantity).toBe(3);
+  });
+
+  it('does not store a discount field when there is no discount', async () => {
+    const id = await addProduct({ name: 'Pin', currencyCode: 'Toman', foreignPriceMinor: 1000 });
+    await setProductStock(id, 5);
+
+    await recordSale({ productId: id, quantity: 1, discountToman: 0 });
+
+    const [sale] = await getSalesHistory();
+    expect(sale.discountToman).toBeUndefined();
+  });
+
+  it('rejects an invalid discount without changing stock or history', async () => {
+    const id = await addProduct({ name: 'Pin', currencyCode: 'Toman', foreignPriceMinor: 1000 });
+    await setProductStock(id, 5);
+
+    await expect(recordSale({ productId: id, quantity: 1, discountToman: 1001 })).rejects.toThrow();
+    await expect(recordSale({ productId: id, quantity: 1, discountToman: -1 })).rejects.toThrow();
+    await expect(recordSale({ productId: id, quantity: 1, discountToman: 10.5 })).rejects.toThrow();
+
+    expect((await getProductById(id))?.stockQuantity).toBe(5);
+    expect(await getSalesHistory()).toHaveLength(0);
+  });
 });

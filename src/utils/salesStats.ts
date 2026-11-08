@@ -1,5 +1,5 @@
 import type { SaleRecord } from '../types/models';
-import { getSaleProfitToman } from './profit';
+import { getSalePaidTotalToman, getSaleProfitToman } from './profit';
 
 export interface SalesStats {
   todayRevenue: number;
@@ -28,14 +28,15 @@ export function computeSalesStats(sales: SaleRecord[], now: Date = new Date()): 
 
     if (!sameMonth) continue;
 
+    const paid = getSalePaidTotalToman(sale);
     const profit = getSaleProfitToman(sale);
 
-    stats.monthRevenue += sale.totalPriceToman;
+    stats.monthRevenue += paid;
     stats.monthProfit += profit;
     stats.monthQuantity += sale.quantity;
 
     if (date.getDate() === now.getDate()) {
-      stats.todayRevenue += sale.totalPriceToman;
+      stats.todayRevenue += paid;
       stats.todayProfit += profit;
       stats.todayQuantity += sale.quantity;
     }

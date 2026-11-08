@@ -6,6 +6,7 @@ import {
   calculateTomanPrice,
   formatBaseTomanPrice,
   formatTomanPrice,
+  getFinalUnitPriceToman,
   getPercentChange,
   normalizeNumberInput,
   parsePriceToMinor,
@@ -118,5 +119,23 @@ describe('normalizeNumberInput', () => {
   it('converts Persian digits and removes separators', () => {
     expect(normalizeNumberInput('۸۹۹٬۰۰۰')).toBe('899000');
     expect(normalizeNumberInput(' 1,234 567 ')).toBe('1234567');
+  });
+
+  describe('getFinalUnitPriceToman', () => {
+    it('applies the base price, rate and price adjustment', () => {
+      expect(getFinalUnitPriceToman(product({ priceMultiplierBps: 11000 }), rate(60000))).toBe(
+        825000,
+      );
+    });
+
+    it('needs a rate for foreign currencies but not for Toman', () => {
+      expect(getFinalUnitPriceToman(product(), undefined)).toBeNull();
+      expect(
+        getFinalUnitPriceToman(
+          product({ currencyCode: 'Toman', foreignPriceMinor: 50000 }),
+          undefined,
+        ),
+      ).toBe(50000);
+    });
   });
 });

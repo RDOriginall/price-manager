@@ -51,4 +51,18 @@ describe('computeSalesStats', () => {
       monthQuantity: 3,
     });
   });
+
+  it('counts the amount paid after discounts', () => {
+    const discounted = {
+      ...sale(new Date(2026, 9, 15, 9).toISOString(), 2, 200, 80),
+      discountToman: 30,
+    };
+
+    expect(computeSalesStats([discounted], now)).toMatchObject({
+      todayRevenue: 170,
+      monthRevenue: 170,
+      todayProfit: 10,
+      monthProfit: 10,
+    });
+  });
 });

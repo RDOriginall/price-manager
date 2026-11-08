@@ -60,14 +60,23 @@ export function formatBaseTomanPrice(product: Product, rate: ExchangeRate | unde
   return `${numberFormatter.format(basePrice)} تومان`;
 }
 
-/** Final price in Toman, including the percentage adjustment. */
-export function formatTomanPrice(product: Product, rate: ExchangeRate | undefined): string {
+/** Final unit price in whole Toman including the price adjustment, or null without a rate. */
+export function getFinalUnitPriceToman(
+  product: Pick<Product, 'currencyCode' | 'foreignPriceMinor' | 'priceMultiplierBps'>,
+  rate: ExchangeRate | undefined,
+): number | null {
   const basePrice = getBaseTomanPrice(product, rate);
 
-  if (basePrice === null) return 'نرخ ثبت نشده';
+  if (basePrice === null) return null;
 
-  const multiplier = product.priceMultiplierBps ?? 10000;
-  const finalPrice = Math.round((basePrice * multiplier) / 10000);
+  return Math.round((basePrice * (product.priceMultiplierBps ?? 10000)) / 10000);
+}
+
+/** Final price in Toman, including the percentage adjustment. */
+export function formatTomanPrice(product: Product, rate: ExchangeRate | undefined): string {
+  const finalPrice = getFinalUnitPriceToman(product, rate);
+
+  if (finalPrice === null) return 'نرخ ثبت نشده';
 
   return `${numberFormatter.format(finalPrice)} تومان`;
 }

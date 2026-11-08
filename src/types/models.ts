@@ -53,5 +53,9 @@ export interface SaleRecord {
 
     unitPriceToman: number;
     totalPriceToman: number;
+
+    // Total discount for this sale line in Toman. Missing means no discount.
+    discountToman?: number;
+
     soldAt: string;
 }
