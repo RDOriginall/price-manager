@@ -1,6 +1,7 @@
 import ExcelJS from 'exceljs';
 import { getSalesHistory } from '../db/salesRepository';
 import { formatCurrencyCode } from '../data/currencyLabels';
+import { formatPersianMonthKey, getPersianMonthKey } from './persianDate';
 import { getPercentChange } from './price';
 import {
   getSaleDiscountToman,
@@ -25,6 +26,7 @@ export async function exportSalesToExcel(): Promise<void> {
   worksheet.columns = [
     { header: 'شناسه فروش', key: 'id', width: 14 },
     { header: 'تاریخ و ساعت', key: 'soldAt', width: 24 },
+    { header: 'ماه', key: 'month', width: 16 },
     { header: 'نام محصول', key: 'productName', width: 28 },
     { header: 'کد محصول', key: 'productCode', width: 18 },
     { header: 'تعداد', key: 'quantity', width: 12 },
@@ -43,6 +45,7 @@ export async function exportSalesToExcel(): Promise<void> {
     worksheet.addRow({
       id: sale.id ?? '',
       soldAt: new Date(sale.soldAt).toLocaleString('fa-IR'),
+      month: formatPersianMonthKey(getPersianMonthKey(new Date(sale.soldAt))),
       productName: sale.productName,
       productCode: sale.productCode ?? '',
       quantity: sale.quantity,

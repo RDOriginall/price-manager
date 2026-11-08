@@ -147,4 +147,11 @@
   .sale-summary { @apply grid gap-1.5 rounded-xl bg-cream p-3 text-sm; }
   .sale-summary > div { @apply flex justify-between gap-3; }
   .sale-summary .sale-total { @apply border-t border-line pt-2 text-base font-extrabold text-plum; }
+
+    /* Month filter above the sales history */
+  .month-filter { @apply mb-4 flex flex-col gap-2 text-sm font-semibold; }
+  .month-filter select {
+    @apply h-12 w-full rounded-xl border border-line bg-cream/60 px-3 text-base font-normal text-ink md:max-w-xs;
+  }
+
 }

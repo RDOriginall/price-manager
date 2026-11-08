@@ -25,6 +25,7 @@ describe('computeSalesStats', () => {
 
   it('returns zeros when there are no sales', () => {
     expect(computeSalesStats([], now)).toEqual({
+      monthLabel: 'مهر ۱۴۰۵',
       todayRevenue: 0,
       monthRevenue: 0,
       todayProfit: 0,
@@ -43,6 +44,7 @@ describe('computeSalesStats', () => {
     ];
 
     expect(computeSalesStats(sales, now)).toEqual({
+      monthLabel: 'مهر ۱۴۰۵',
       todayRevenue: 200,
       monthRevenue: 250,
       todayProfit: 40,
@@ -63,6 +65,21 @@ describe('computeSalesStats', () => {
       monthRevenue: 170,
       todayProfit: 10,
       monthProfit: 10,
+    });
+  });
+
+  it('uses the Persian month, not the Gregorian one', () => {
+    const aban17 = new Date(2026, 10, 8, 12); // 17 Aban 1405
+    const sales = [
+      sale(new Date(2026, 9, 25, 9).toISOString(), 1, 100, 60), // 3 Aban: same Persian month
+      sale(new Date(2026, 9, 20, 9).toISOString(), 1, 500, 100), // 28 Mehr: previous month
+    ];
+
+    expect(computeSalesStats(sales, aban17)).toMatchObject({
+      todayRevenue: 0,
+      monthRevenue: 100,
+      monthProfit: 40,
+      monthQuantity: 1,
     });
   });
 });
