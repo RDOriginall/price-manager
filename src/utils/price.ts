@@ -35,7 +35,7 @@ export function formatForeignPrice(minor: number, currencyCode: CurrencyCode): s
 /** Converts a foreign price (minor units) to whole Toman, rounded to the nearest Toman. */
 export function calculateTomanPrice(
   product: Pick<Product, 'foreignPriceMinor'>,
-  rate: ExchangeRate,
+  rate: Pick<ExchangeRate, 'rateToToman'>,
 ): bigint {
   const numerator = BigInt(product.foreignPriceMinor) * BigInt(rate.rateToToman);
   return (numerator + 50n) / 100n;

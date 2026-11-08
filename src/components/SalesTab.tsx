@@ -4,6 +4,7 @@ import { exportBackup, importBackup } from '../utils/backup';
 import { exportSalesToExcel } from '../utils/exportSalesToExcel';
 import { dateFormatter, numberFormatter } from '../utils/format';
 import { getErrorMessage } from '../utils/errors';
+import { getSaleProfitToman } from '../utils/profit';
 import { computeSalesStats } from '../utils/salesStats';
 
 interface SalesTabProps {
@@ -13,7 +14,8 @@ interface SalesTabProps {
 
 export function SalesTab({ active, sales }: SalesTabProps) {
   const importInputRef = useRef<HTMLInputElement>(null);
-  const { todayRevenue, monthRevenue, todayQuantity, monthQuantity } = computeSalesStats(sales);
+  const { todayRevenue, monthRevenue, todayProfit, monthProfit, todayQuantity, monthQuantity } =
+    computeSalesStats(sales);
 
   async function handleExportSales() {
     try {
@@ -57,7 +59,9 @@ export function SalesTab({ active, sales }: SalesTabProps) {
         <div className='section-heading'>
           <div>
             <h2>گزارش فروش</h2>
-            <p>خلاصه عملکرد فروشگاه</p>
+            <p>
+              خلاصه عملکرد فروشگاه. سود یعنی مبلغ فروش منهای قیمت پایه کالا (با نرخ ارز روز فروش).
+            </p>
           </div>
         </div>
 
@@ -70,6 +74,16 @@ export function SalesTab({ active, sales }: SalesTabProps) {
           <article className='stat-card'>
             <h3>فروش این ماه</h3>
             <p>{numberFormatter.format(monthRevenue)} تومان</p>
+          </article>
+
+          <article className='stat-card'>
+            <h3>سود امروز</h3>
+            <p>{numberFormatter.format(todayProfit)} تومان</p>
+          </article>
+
+          <article className='stat-card'>
+            <h3>سود این ماه</h3>
+            <p>{numberFormatter.format(monthProfit)} تومان</p>
           </article>
 
           <article className='stat-card'>
@@ -140,6 +154,7 @@ export function SalesTab({ active, sales }: SalesTabProps) {
                   <th>تعداد</th>
                   <th>قیمت واحد: تومان</th>
                   <th>مبلغ کل: تومان</th>
+                  <th>سود: تومان</th>
                 </tr>
               </thead>
               <tbody>
@@ -151,6 +166,7 @@ export function SalesTab({ active, sales }: SalesTabProps) {
                     <td>{numberFormatter.format(sale.quantity)}</td>
                     <td>{numberFormatter.format(sale.unitPriceToman)}</td>
                     <td>{numberFormatter.format(sale.totalPriceToman)}</td>
+                    <td>{numberFormatter.format(getSaleProfitToman(sale))}</td>
                   </tr>
                 ))}
               </tbody>
