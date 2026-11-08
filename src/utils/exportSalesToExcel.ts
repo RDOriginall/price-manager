@@ -2,7 +2,12 @@ import ExcelJS from 'exceljs';
 import { getSalesHistory } from '../db/salesRepository';
 import { formatCurrencyCode } from '../data/currencyLabels';
 import { getPercentChange } from './price';
-import { getSaleProfitToman, getSaleUnitCostToman } from './profit';
+import {
+  getSaleDiscountToman,
+  getSalePaidTotalToman,
+  getSaleProfitToman,
+  getSaleUnitCostToman,
+} from './profit';
 
 export async function exportSalesToExcel(): Promise<void> {
   const sales = await getSalesHistory();
@@ -28,6 +33,8 @@ export async function exportSalesToExcel(): Promise<void> {
     { header: 'ضریب قیمت (%)', key: 'multiplier', width: 18 },
     { header: 'قیمت واحد (تومان)', key: 'unitPriceToman', width: 22 },
     { header: 'مبلغ کل (تومان)', key: 'totalPriceToman', width: 22 },
+    { header: 'تخفیف (تومان)', key: 'discountToman', width: 18 },
+    { header: 'مبلغ پس از تخفیف (تومان)', key: 'paidTotalToman', width: 26 },
     { header: 'هزینه واحد (تومان)', key: 'unitCostToman', width: 22 },
     { header: 'سود (تومان)', key: 'profitToman', width: 20 },
   ];
@@ -47,6 +54,8 @@ export async function exportSalesToExcel(): Promise<void> {
       multiplier: getPercentChange(sale.priceMultiplierBpsAtSale),
       unitPriceToman: sale.unitPriceToman,
       totalPriceToman: sale.totalPriceToman,
+      discountToman: getSaleDiscountToman(sale),
+      paidTotalToman: getSalePaidTotalToman(sale),
       unitCostToman: getSaleUnitCostToman(sale),
       profitToman: getSaleProfitToman(sale),
     });

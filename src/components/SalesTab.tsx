@@ -4,7 +4,7 @@ import { exportBackup, importBackup } from '../utils/backup';
 import { exportSalesToExcel } from '../utils/exportSalesToExcel';
 import { dateFormatter, numberFormatter } from '../utils/format';
 import { getErrorMessage } from '../utils/errors';
-import { getSaleProfitToman } from '../utils/profit';
+import { getSaleDiscountToman, getSalePaidTotalToman, getSaleProfitToman } from '../utils/profit';
 import { computeSalesStats } from '../utils/salesStats';
 
 interface SalesTabProps {
@@ -154,6 +154,8 @@ export function SalesTab({ active, sales }: SalesTabProps) {
                   <th>تعداد</th>
                   <th>قیمت واحد: تومان</th>
                   <th>مبلغ کل: تومان</th>
+                  <th>تخفیف: تومان</th>
+                  <th>مبلغ پس از تخفیف: تومان</th>
                   <th>سود: تومان</th>
                 </tr>
               </thead>
@@ -166,6 +168,8 @@ export function SalesTab({ active, sales }: SalesTabProps) {
                     <td>{numberFormatter.format(sale.quantity)}</td>
                     <td>{numberFormatter.format(sale.unitPriceToman)}</td>
                     <td>{numberFormatter.format(sale.totalPriceToman)}</td>
+                    <td>{numberFormatter.format(getSaleDiscountToman(sale))}</td>
+                    <td>{numberFormatter.format(getSalePaidTotalToman(sale))}</td>
                     <td>{numberFormatter.format(getSaleProfitToman(sale))}</td>
                   </tr>
                 ))}

@@ -4,7 +4,7 @@ import {
   setProductPriceMultiplier,
   setProductStock,
 } from '../db/productRepository';
-import { getSalesHistory, recordSale } from '../db/salesRepository';
+import { recordSale } from '../db/salesRepository';
 import type { Product } from '../types/models';
 import { getErrorMessage } from '../utils/errors';
 import { getPercentChange } from '../utils/price';
@@ -78,38 +78,24 @@ export function useProductActions({
     }
   }
 
-  async function handleSell(product: Product) {
+  /** Records a sale. Throws on failure so the sale dialog can show the message. */
+  async function sellProduct(
+    product: Product,
+    sale: { quantity: number; discountToman: number },
+  ): Promise<void> {
     if (product.id === undefined) {
-      setError('شناسه محصول نامعتبر است.');
-      return;
+      throw new Error('شناسه محصول نامعتبر است.');
     }
 
-    const input = window.prompt(`تعداد فروش برای «${product.name}» را وارد کنید:`, '1');
+    await recordSale({
+      productId: product.id,
+      quantity: sale.quantity,
+      discountToman: sale.discountToman,
+    });
 
-    if (input === null) return;
-
-    const quantity = Number(input.trim());
-
-    if (!/^[1-9]\d*$/.test(input.trim()) || !Number.isSafeInteger(quantity)) {
-      setError('تعداد فروش باید عدد صحیح و مثبت باشد.');
-      return;
-    }
-
-    try {
-      setError('');
-      await recordSale({
-        productId: product.id,
-        quantity,
-      });
-
-      await refreshProducts();
-      await refreshSales();
-
-      const history = await getSalesHistory();
-      alert(`فروش ثبت شد.\nتعداد رکوردهای تاریخچه فروش: ${history.length}`);
-    } catch (err) {
-      setError(`ثبت فروش ناموفق بود: ${getErrorMessage(err)}`);
-    }
+    setError('');
+    await refreshProducts();
+    await refreshSales();
   }
 
   const handleSetPriceAdjustment = async (product: Product) => {
@@ -186,7 +172,7 @@ export function useProductActions({
   return {
     handleDelete,
     handleSetStock,
-    handleSell,
+    sellProduct,
     handleSetPriceAdjustment,
     handleAdjustAllPrices,
   };
